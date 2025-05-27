@@ -1,155 +1,73 @@
-# AdvancedDB
-
-
-## Database Schema (ERD)
-
 ```mermaid
 erDiagram
-    Users ||--o{ UserRoles : has
-    Users ||--o| Employees : has
-    Roles ||--o{ UserRoles : has
-    Roles ||--o{ PermissionRole : has
-    Permissions ||--o{ PermissionRole : has
-    Employees ||--o{ Employees : manages
-    Employees ||--o{ Orders : processes
-    Employees ||--o{ Departments : manages
-    Departments ||--o{ Employees : contains
-    Customers ||--o{ Orders : places
-    Orders ||--o{ OrderDetails : contains
-    Products ||--o{ OrderDetails : includes
-    Products ||--o{ Categories : belongs_to
-    Products ||--o{ Suppliers : supplied_by
-    Shippers ||--o{ Orders : ships
-
-    Users {
-        int UserId PK
-        string Username
-        string Email
-        string PasswordHash
-        string PasswordSalt
-        string RefreshToken
-        datetime RefreshTokenExpiryTime
-        int RoleId FK
-        boolean IsActive
-        datetime CreatedDate
-        datetime LastModifiedDate
-        datetime LastLoginDate
-    }
-
-    Roles {
-        int RoleId PK
-        string Name
-        string Description
-        datetime CreatedDate
-        datetime LastModifiedDate
-    }
-
-    Permissions {
-        int PermissionId PK
-        string Name
-        string Description
-        datetime CreatedDate
-        datetime LastModifiedDate
-    }
-
-    Employees {
-        int EmployeeId PK
+    ApplicationUser {
+        string Id PK
         string FirstName
         string LastName
         string Email
-        string Phone
-        datetime HireDate
-        decimal Salary
+        int? EmployeeId FK
+    }
+    Employee {
+        int EmployeeId PK
+        string FirstName
+        string LastName
         int DepartmentId FK
-        int ManagerId FK
-        int UserId FK
-        boolean IsActive
-        datetime CreatedDate
-        datetime LastModifiedDate
+        int PositionId FK
     }
-
-    Departments {
+    Department {
         int DepartmentId PK
-        string Name
-        string Description
-        int ManagerId FK
-        datetime CreatedDate
-        datetime LastModifiedDate
+        string DepartmentName
     }
-
-    Customers {
-        int CustomerId PK
-        string CompanyName
-        string ContactName
-        string ContactTitle
-        string Address
-        string City
-        string Region
-        string PostalCode
-        string Country
-        string Phone
-        string Fax
-        datetime CreatedDate
-        datetime LastModifiedDate
+    Position {
+        int PositionId PK
+        string PositionTitle
+        int DepartmentId FK
     }
-
-    Orders {
+    Order {
         int OrderId PK
         int CustomerId FK
         int EmployeeId FK
-        datetime OrderDate
-        datetime RequiredDate
-        datetime ShippedDate
         int ShipperId FK
+        DateTime OrderDate
+        DateTime RequiredDate
+        string ShipName
         string ShipAddress
         string ShipCity
-        string ShipRegion
-        string ShipPostalCode
         string ShipCountry
-        decimal Freight
+        string Status
         string Notes
-        int Status
-        datetime CreatedDate
-        datetime LastModifiedDate
     }
-
-    OrderDetails {
+    OrderDetail {
         int OrderDetailId PK
         int OrderId FK
         int ProductId FK
-        decimal UnitPrice
         int Quantity
+        decimal UnitPrice
         decimal Discount
-        datetime CreatedDate
-        datetime LastModifiedDate
     }
-
-    Products {
+    Product {
         int ProductId PK
-        string Name
-        string Description
+        string ProductName
+        int SupplierId FK
+        int CategoryId FK
+        string QuantityPerUnit
         decimal UnitPrice
         int UnitsInStock
-        int CategoryId FK
-        int SupplierId FK
-        boolean Discontinued
-        datetime CreatedDate
-        datetime LastModifiedDate
+        int UnitsOnOrder
+        int ReorderLevel
+        bool Discontinued
     }
-
-    Categories {
+    Category {
         int CategoryId PK
-        string Name
+        string CategoryName
         string Description
-        datetime CreatedDate
-        datetime LastModifiedDate
     }
-
-    Suppliers {
+    Supplier {
         int SupplierId PK
         string CompanyName
         string ContactName
         string ContactTitle
+        string Email
         string Address
         string City
         string Region
@@ -157,25 +75,62 @@ erDiagram
         string Country
         string Phone
         string Fax
-        datetime CreatedDate
-        datetime LastModifiedDate
+        string HomePage
     }
-
-    Shippers {
+    Customer {
+        int CustomerId PK
+        string CompanyName
+        string ContactName
+        string ContactTitle
+        string Email
+        string Phone
+        string Address
+        string City
+        string Country
+    }
+    Shipper {
         int ShipperId PK
         string CompanyName
-        string Phone
-        datetime CreatedDate
-        datetime LastModifiedDate
+        string PhoneNumber
+        string Email
+        string Address
+        string City
+        string State
+        string PostalCode
+        string Country
+    }
+    Invoice {
+        int InvoiceId PK
+        int OrderId FK
+        string InvoiceNumber
+        DateTime InvoiceDate
+        decimal Subtotal
+        decimal Tax
+        decimal Total
+        decimal AmountPaid
+        decimal BalanceDue
+        string Status
+    }
+    InvoicePayment {
+        int PaymentId PK
+        int InvoiceId FK
+        DateTime PaymentDate
+        decimal Amount
+        string PaymentMethod
+        string TransactionId
+        string Status
     }
 
-    UserRoles {
-        int UserId FK
-        int RoleId FK
-    }
-
-    PermissionRole {
-        int PermissionId FK
-        int RoleId FK
-    }
+    ApplicationUser ||--o{ Employee : "has"
+    Employee ||--o{ Order : "places"
+    Department ||--o{ Employee : "belongs to"
+    Position ||--o{ Employee : "holds"
+    Order ||--o{ OrderDetail : "contains"
+    OrderDetail ||--o{ Product : "references"
+    Product ||--o{ Category : "belongs to"
+    Product ||--o{ Supplier : "supplied by"
+    Order ||--o{ Customer : "placed by"
+    Order ||--o{ Shipper : "shipped by"
+    Order ||--o{ Invoice : "generates"
+    Invoice ||--o{ InvoicePayment : "receives"
 ```
